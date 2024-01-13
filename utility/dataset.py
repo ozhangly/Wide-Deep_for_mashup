@@ -1,5 +1,4 @@
 import json
-
 import utility.transcoding
 
 from tqdm import tqdm
@@ -12,7 +11,7 @@ args = utility.transcoding.args
 class APIDataSet(Dataset):
     def __init__(self):
         super(APIDataSet, self).__init__()
-        file_path: str = args.training_data_path
+        file_path: str = args.training_data_path + args.dataset
         number: int = 0
         with open(file=file_path, mode='r') as fp:
             for _ in tqdm(fp, desc='load dataset'):
@@ -34,3 +33,10 @@ class APIDataSet(Dataset):
 
         return data, label
 
+
+def get_dataloader(train: bool = True) -> DataLoader:
+    dataset = APIDataSet()
+    batch_size = args.train_batch_size if train else args.test_batch_size
+    loader = DataLoader(dataset=dataset, shuffle=True, batch_size=batch_size, num_workers=4)
+
+    return loader
