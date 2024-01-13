@@ -1,13 +1,13 @@
 import json
 import random
-import utility.config
+import config
 
 from random import shuffle
 from typing import List, Dict, Union
 
 
-api_range = utility.config.api_range
-# args = utility.config.args
+api_range = config.api_range
+args = config.args
 
 
 def get_ma_api(data_file: str = '../origin dataset/inter.csv') -> List[Dict[str, Union[int, List[int]]]]:

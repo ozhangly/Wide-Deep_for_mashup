@@ -1,4 +1,4 @@
-from utility.parser import arg_parse
+from parser_args import arg_parse
 
 
 args = arg_parse()
