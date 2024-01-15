@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class Wide(nn.Module):
@@ -47,16 +46,17 @@ class WideDeep(nn.Module):
 
         self.output_layer = nn.Sigmoid()
 
-    def forward(self, input: torch.Tensor):
+    def forward(self, input):
         wide_input = [input['encoded_used_api'],
                       input['encoded_candidate_api'],
                       input['cross_product_used_candidate_api']]
         deep_input = [input['encoded_used_api'],
                       input['encoded_candidate_api'],
-                      input['description_feature']]
+                      input['mashup_description_feature'],
+                      input['candidate_api_description_feature']]
 
-        deep_input = torch.cat(deep_input, dim=1)
-        wide_input = torch.cat(wide_input, dim=1)
+        deep_input = torch.cat(deep_input, dim=1).cuda()
+        wide_input = torch.cat(wide_input, dim=1).cuda()
         wide_output = self.wide(wide_input)
         deep_output = self.deep(deep_input)
 

@@ -31,7 +31,7 @@ class APIDataSet(Dataset):
         label = data['label']
         data = utility.transcoding.encode_data(data)
 
-        return data, label
+        return data, label                      # 返回字典和一个数值, 应该不是这里进行tensor化的
 
 
 def get_dataloader(train: bool = True) -> DataLoader:
