@@ -12,6 +12,10 @@ def arg_parse():
 
     args.add_argument('--api_desc_path', nargs='?', default='./origin dataset/api_desc_feature/', type=str)
 
+    args.add_argument('--output_path', nargs='?', default='./output/', type=str)
+
+    args.add_argument('--save_weight_path', nargs='?', default='./weight/', type=str)
+
     args.add_argument('--dataset', nargs='?', default='train_0_torch.json', type=str)
 
     args.add_argument('--model_type', nargs='?', default='Wide&Deep', type=str)
@@ -23,8 +27,8 @@ def arg_parse():
 
     args.add_argument('--epoch', nargs='?', default=100, type=int)
 
-    args.add_argument('--lr', nargs='?', default=0.0001, type=float)
+    args.add_argument('--lr', nargs='?', default=0.01, type=float)
 
-    args.add_argument('--save_weight_path', default='./weight/')
+    args.add_argument('--weight_decay', nargs='?', default=0.0001, type=float)
 
     return args.parse_args()

@@ -26,7 +26,7 @@ def cross_product_transformation(encoded_api_list, encoded_api) -> np.ndarray:
 
 
 # 对训练数据进行编码
-def encode_data(data: Dict) -> Dict[str, Union[List, ]]:
+def encode_data(data: Dict) -> Dict[str, Union[List, np.ndarray, int]]:
     encoded_api_list = encode_api_list(api_list=data['api_list'])
     encoded_candidate_api = encode_api(api=data['target_api'])
     cross_product_feature = cross_product_transformation(encoded_api_list, encoded_candidate_api)
