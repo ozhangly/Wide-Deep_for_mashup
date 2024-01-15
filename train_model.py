@@ -25,8 +25,8 @@ data_loader = utility.dataset.get_dataloader()
 criterion = torch.nn.BCELoss()
 
 # 两个部分的优化方式不同
-wide_optimizer = optim.Adagrad(Wide_Deep.Wide.parameters(), lr=args.lr)
-deep_optimizer = optim.Adam(Wide_Deep.Deep.parameters(), lr=args.lr)
+wide_optimizer = optim.Adagrad(Wide_Deep.Wide.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+deep_optimizer = optim.Adam(Wide_Deep.Deep.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
 
 if __name__ == '__main__':
