@@ -8,9 +8,9 @@ def arg_parse():
 
     args.add_argument('--testing_data_path', nargs='?', default='./testing data/', type=str)
 
-    args.add_argument('--mashup_desc_path', nargs='?', default='./origin dataset/ma_desc_feature/', type=str)
+    args.add_argument('--mashup_desc_path', nargs='?', default='../origin dataset/ma_desc_feature/', type=str)
 
-    args.add_argument('--api_desc_path', nargs='?', default='./origin dataset/api_desc_feature/', type=str)
+    args.add_argument('--api_desc_path', nargs='?', default='../origin dataset/api_desc_feature/', type=str)
 
     args.add_argument('--output_path', nargs='?', default='./output/', type=str)
 
