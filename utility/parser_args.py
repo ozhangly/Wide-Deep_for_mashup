@@ -18,6 +18,10 @@ def arg_parse():
 
     args.add_argument('--dataset', nargs='?', default='train_0_torch.json', type=str)
 
+    args.add_argument('--test_dataset', nargs='?', default='testing_0.json', type=str)
+
+    args.add_argument('--recommend_res', nargs='?', default='testing_WD_0.json', type=str)
+
     args.add_argument('--model_type', nargs='?', default='Wide&Deep', type=str)
 
     # 还有一些模型和训练的参数

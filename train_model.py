@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
             global_step_idx = i * args.train_batch_size + idx + 1
             # writer.add_scalar(tag='deep loss curve', scalar_value=loss_deep.item(), global_step=global_step_idx)
-            writer.add_scalar(tag='wide loss curve', scalar_value=loss_wide.item(), global_step=global_step_idx)
+            writer.add_scalar(tag='loss curve', scalar_value=loss_wide.item(), global_step=global_step_idx)
 
             # 记录一下模型的参数
             for name, parameter in model.named_parameters():
@@ -75,6 +75,4 @@ if __name__ == '__main__':
             torch.save(model.state_dict(), args.save_weight_path + args.model_type + '/' + args.lr + '/')
 
         train_bar.update()
-    #这里是最后训练结束的地方
-    # 保存推荐结果，保存模型效果
     train_bar.close()
