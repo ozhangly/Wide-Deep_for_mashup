@@ -74,7 +74,7 @@ class WideDeep(nn.Module):
                                 torch.tensor(candidate_api_description_feature, dtype=torch.float64)), dim=1).cuda()    # deep_input: [batch_size, 1024 + api_range * 2]
 
         deep_output = self.deep(deep_input)                 # deep_output: [batch_size, 1]
-        wide_output = self.wide(wide_input, deep_output)    #
+        wide_output = self.wide(wide_input, deep_output)
 
         output = self.output_activate_f(wide_output)
 
