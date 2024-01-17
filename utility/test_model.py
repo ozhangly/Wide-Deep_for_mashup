@@ -42,6 +42,8 @@ def test_model(model_path: str) -> None:
     write_recommend_fp = open(file=args.output_path + args.recommend_res, mode='w')
     model = Wide_Deep.WideDeep(utility.config.api_range)
     model.load_state_dict(torch.load(model_path))
+
+    result_list: List = []
     with torch.no_grad():
         model.eval()
         with open(file=args.testing_data_path + args.test_dataset, mode='r') as fp:
@@ -52,6 +54,8 @@ def test_model(model_path: str) -> None:
                 # 然后造标签
                 outputs = outputs.view(-1).tolist()
                 probability_list = []
+
+                removed_api = test_obj['removed_api']
 
                 num = 0
                 for i in range(utility.config.api_range):
@@ -69,3 +73,18 @@ def test_model(model_path: str) -> None:
                 write_content = json.dumps(write_data) + '\n'
                 write_recommend_fp.write(write_content)
 
+                set_true = set(removed_api) & set(top_n_api[:5])
+                list_true = list(set_true)
+
+                result_list.append(len(list_true) / 5.0)
+
+                result = sum(result_list) / len(result_list)
+                print(num)
+                print(result)
+                print('--------------------')
+
+
+if __name__ == '__main__':
+    fold: str = '4'
+    path: str = 'model_wide_deep'
+    test_model('./' + path + '/model_' + fold + '.pth')
