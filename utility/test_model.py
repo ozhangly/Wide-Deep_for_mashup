@@ -14,7 +14,8 @@ args = utility.config.args
 def encode_test_data(data: Dict) -> List:
     input_data: List = []
     api_list = data['api_list']
-    for target_api in range(utility.config.api_range):
+    for i in range(utility.config.api_range):
+        target_api = i + 1
         if target_api not in api_list:
             encoded_candidate_api = encode_api(target_api)
             encoded_used_api = encode_api_list(api_list)
@@ -47,13 +48,15 @@ def test_model(model_path: str) -> None:
     model = model(utility.config.device)
     result_list: List = []
 
+    test_num: int = 0
     model.eval()
     with torch.no_grad():
         for lines in test_fp.readlines():
             test_obj = json.loads(lines.strip('\n'))
+            test_num += 1
             inputs = encode_test_data(test_obj)
+
             outputs = model(inputs)
-            # 然后造标签
             outputs = outputs.view(-1).tolist()
             probability_list = []
 
@@ -75,13 +78,13 @@ def test_model(model_path: str) -> None:
             write_content = json.dumps(write_data) + '\n'
             write_recommend_fp.write(write_content)
 
-            set_true = set(removed_api) & set(top_n_api[:5])
+            set_true = set(removed_api) & set(top_n_api[:10])
             list_true = list(set_true)
 
-            result_list.append(len(list_true) / 5.0)
+            result_list.append(len(list_true) / 10.0)
 
             result = sum(result_list) / len(result_list)
-            print(num)
+            print(test_num)
             print(result)
             print('--------------------')
 
