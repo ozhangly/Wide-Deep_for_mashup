@@ -40,49 +40,53 @@ def get_top_n_api(probability_list, top_n) -> List:
 
 def test_model(model_path: str) -> None:
     write_recommend_fp = open(file=args.output_path + args.recommend_res, mode='w')
+    test_fp = open(file=args.testing_data_path + args.test_dataset, mode='r')
     model = Wide_Deep.WideDeep(utility.config.api_range)
     model.load_state_dict(torch.load(model_path))
 
     model = model(utility.config.device)
     result_list: List = []
+
+    model.eval()
     with torch.no_grad():
-        model.eval()
-        with open(file=args.testing_data_path + args.test_dataset, mode='r') as fp:
-            for lines in fp.readlines():
-                test_obj = json.loads(lines.strip('\n'))
-                inputs = encode_test_data(test_obj)
-                outputs = model(inputs)
-                # 然后造标签
-                outputs = outputs.view(-1).tolist()
-                probability_list = []
+        for lines in test_fp.readlines():
+            test_obj = json.loads(lines.strip('\n'))
+            inputs = encode_test_data(test_obj)
+            outputs = model(inputs)
+            # 然后造标签
+            outputs = outputs.view(-1).tolist()
+            probability_list = []
 
-                removed_api = test_obj['removed_api']
+            removed_api = test_obj['removed_api']
 
-                num = 0
-                for i in range(utility.config.api_range):
-                    target_api = i + 1
-                    if target_api not in test_obj['api_list']:
-                        probability_list.append((outputs[num], target_api))
-                        num += 1
+            num = 0
+            for i in range(utility.config.api_range):
+                target_api = i + 1
+                if target_api not in test_obj['api_list']:
+                    probability_list.append((outputs[num], target_api))
+                    num += 1
 
-                top_n_api = get_top_n_api(probability_list, 10)
-                write_data = {
-                    'mashup_id': test_obj['mashup_id'],
-                    'recommend_api': top_n_api,
-                    'removed_apis': test_obj['removed_api_list']
-                }
-                write_content = json.dumps(write_data) + '\n'
-                write_recommend_fp.write(write_content)
+            top_n_api = get_top_n_api(probability_list, 10)
+            write_data = {
+                'mashup_id': test_obj['mashup_id'],
+                'recommend_api': top_n_api,
+                'removed_apis': test_obj['removed_api_list']
+            }
+            write_content = json.dumps(write_data) + '\n'
+            write_recommend_fp.write(write_content)
 
-                set_true = set(removed_api) & set(top_n_api[:5])
-                list_true = list(set_true)
+            set_true = set(removed_api) & set(top_n_api[:5])
+            list_true = list(set_true)
 
-                result_list.append(len(list_true) / 5.0)
+            result_list.append(len(list_true) / 5.0)
 
-                result = sum(result_list) / len(result_list)
-                print(num)
-                print(result)
-                print('--------------------')
+            result = sum(result_list) / len(result_list)
+            print(num)
+            print(result)
+            print('--------------------')
+
+    test_fp.close()
+    write_recommend_fp.close()
 
 
 if __name__ == '__main__':
