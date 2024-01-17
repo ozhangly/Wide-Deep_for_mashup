@@ -92,8 +92,8 @@ def train() -> None:
 if __name__ == '__main__':
 
     if args.continue_training:
-        model.load_state_dict(torch.load(args.save_weight_path + args.dataset + '/model.pth'))
-        wide_optimizer.load_state_dict(torch.load(args.save_weight_path + args.dataset + '/deep_optimizer.pth'))
-        deep_optimizer.load_state_dict(torch.load(args.save_weight_path + args.dataset + '/wide_optimizer.pth'))
+        model.load_state_dict(torch.load('./' + path + '/model_' + fold + '.pth'))
+        wide_optimizer.load_state_dict(torch.load('./' + path + '/wide_optimizer_' + fold + '.pth'))
+        deep_optimizer.load_state_dict(torch.load('./' + path + '/deep_optimizer_' + fold + '.pth'))
 
     train()
