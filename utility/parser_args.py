@@ -4,9 +4,9 @@ import argparse
 def arg_parse():
     args = argparse.ArgumentParser()
 
-    args.add_argument('--training_data_path', nargs='?', default='./training data/', type=str)
+    args.add_argument('--training_data_path', nargs='?', default='../training data/', type=str)
 
-    args.add_argument('--testing_data_path', nargs='?', default='./testing data/', type=str)
+    args.add_argument('--testing_data_path', nargs='?', default='../testing data/', type=str)
 
     args.add_argument('--mashup_desc_path', nargs='?', default='../origin dataset/ma_desc_feature/', type=str)
 
