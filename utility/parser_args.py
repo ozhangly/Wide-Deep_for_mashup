@@ -25,9 +25,11 @@ def arg_parse():
     args.add_argument('--model_type', nargs='?', default='Wide&Deep', type=str)
 
     # 还有一些模型和训练的参数
-    args.add_argument('--train_batch_size', nargs='?', default=2048, type=int)
+    args.add_argument('--continue_training', nargs='?', default=0, type=int)
 
-    args.add_argument('--test_batch_size', nargs='?', default=256, type=int)
+    args.add_argument('--train_batch_size', nargs='?', default=256, type=int)
+
+    args.add_argument('--test_batch_size', nargs='?', default=64, type=int)
 
     args.add_argument('--epoch', nargs='?', default=100, type=int)
 
