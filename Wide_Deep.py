@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import utility.config
 
 
 class Wide(nn.Module):
@@ -46,32 +47,16 @@ class WideDeep(nn.Module):
         self.output_activate_f = nn.Sigmoid()
 
     def forward(self, input):                       # batch_size长的字典列表
-        # wide_input = [input['encoded_used_api'],
-        #               input['encoded_candidate_api'],
-        #               input['cross_product_used_candidate_api']]
-        # deep_input = [input['encoded_used_api'],
-        #               input['encoded_candidate_api'],
-        #               input['mashup_description_feature'],
-        #               input['candidate_api_description_feature']]
-        # 需要5个list，来存储这几个变量
-        encoded_api_list, encoded_candidate_api, cross_product_used_candidate_api, \
-        mashup_description_feature, candidate_api_description_feature = [], [], [], [], []
+        wide_input = [input['encoded_used_api'],            # 这个不用管，pytorch自动整合了
+                      input['encoded_candidate_api'],
+                      input['cross_product_used_candidate_api']]
+        deep_input = [input['encoded_used_api'],
+                      input['encoded_candidate_api'],
+                      input['mashup_description_feature'],
+                      input['candidate_api_description_feature']]
 
-        for d in input:
-            encoded_api_list.append(d['encoded_used_api'])                  # 列表的形状: [batch_size, api_range]
-            encoded_candidate_api.append(d['encoded_candidate_api'])
-            cross_product_used_candidate_api.append(d['cross_product_used_candidate_api'])
-            mashup_description_feature.append(d['mashup_description_feature'])
-            candidate_api_description_feature.append(d['candidate_api_description_feature'])
-
-        wide_input = torch.cat((torch.tensor(encoded_api_list, dtype=torch.float64),
-                                torch.tensor(encoded_candidate_api, dtype=torch.float64),
-                                torch.tensor(cross_product_used_candidate_api, dtype=torch.float64)), dim=1).cuda()     # wide_input: [batch_size, api_range*2 + api_range^2]
-
-        deep_input = torch.cat((torch.tensor(encoded_api_list, dtype=torch.float64),
-                                torch.tensor(encoded_candidate_api, dtype=torch.float64),
-                                torch.tensor(mashup_description_feature, dtype=torch.float64),
-                                torch.tensor(candidate_api_description_feature, dtype=torch.float64)), dim=1).cuda()    # deep_input: [batch_size, 1024 + api_range * 2]
+        deep_input = torch.cat(deep_input, dim=1).float().to(utility.config.device)
+        wide_input = torch.cat(wide_input, dim=1).float().to(utility.config.device)
 
         deep_output = self.deep(deep_input)                 # deep_output: [batch_size, 1]
         wide_output = self.wide(wide_input, deep_output)
