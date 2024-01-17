@@ -1,4 +1,5 @@
 # 接下来就开始写这个了
+import os
 import torch
 import Wide_Deep
 import utility.dataset
@@ -7,6 +8,7 @@ import utility.config
 import torch.optim as optim
 
 from tqdm import tqdm
+from typing import Union
 from tensorboardX import SummaryWriter
 
 
@@ -15,9 +17,7 @@ args = utility.dataset.args
 writer = SummaryWriter(logdir='./logdir')
 
 model = Wide_Deep.WideDeep(utility.config.api_range)
-
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-model = model.to(device)
+model = model.to(utility.config.device)
 
 data_loader = utility.dataset.get_dataloader()
 
@@ -28,18 +28,24 @@ criterion = torch.nn.BCELoss()
 wide_optimizer = optim.Adagrad(Wide_Deep.Wide.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 deep_optimizer = optim.Adam(Wide_Deep.Deep.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
+fold: str = '4'
+path: str = 'model_wide_deep'
 
-if __name__ == '__main__':
 
+def ensure_dir(path: str) -> None:
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
+def train() -> None:
     train_bar = tqdm(desc='train process...', leave=False, total=args.epoch)
     # 什么时候开始训练呢?
+    model.train()
     for i in range(args.epoch):
-        model.train()
         for idx, (train_input, label) in enumerate(data_loader):
-            output = model(train_input)
-                                                # output: [batch_size, 1]
+            output = model(train_input)  # output: [batch_size, 1]
             # 这里有两个损失值，该怎么设计？
-            labels = label.to(device)
+            labels = label.to(utility.config.device)
 
             output = output.view(-1).float()
             loss_wide = criterion(output, labels)
@@ -70,9 +76,24 @@ if __name__ == '__main__':
             for name, parameter in model.named_parameters():
                 writer.add_histogram(name, parameter.data, global_step=global_step_idx)
 
-        # 然后每10个epoch测试记录一下结果
-        if (i+1) % 10 == 0:
-            torch.save(model.state_dict(), args.save_weight_path + args.model_type + '/' + args.lr + '/')
+        # 然后每10个epoch记录模型
+            if idx % 100 == 0:
+                torch.save(wide_optimizer.state_dict(), './' + path + '/model_' + fold + '.pth')
+                torch.save(deep_optimizer.state_dict(), './' + path + '/wide_optimizer_' + fold + '.pth')
+                torch.save(model.state_dict(), './' + path + '/deep_optimizer_' + fold + '.pth')
+        torch.save(wide_optimizer.state_dict(), './' + path + '/model_' + fold + '.pth')
+        torch.save(deep_optimizer.state_dict(), './' + path + '/wide_optimizer_' + fold + '.pth')
+        torch.save(model.state_dict(), './' + path + '/deep_optimizer_' + fold + '.pth')
 
         train_bar.update()
     train_bar.close()
+
+
+if __name__ == '__main__':
+
+    if args.continue_training:
+        model.load_state_dict(torch.load(args.save_weight_path + args.dataset + '/model.pth'))
+        wide_optimizer.load_state_dict(torch.load(args.save_weight_path + args.dataset + '/deep_optimizer.pth'))
+        deep_optimizer.load_state_dict(torch.load(args.save_weight_path + args.dataset + '/wide_optimizer.pth'))
+
+    train()
