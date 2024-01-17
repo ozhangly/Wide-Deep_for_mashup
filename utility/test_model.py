@@ -43,6 +43,7 @@ def test_model(model_path: str) -> None:
     model = Wide_Deep.WideDeep(utility.config.api_range)
     model.load_state_dict(torch.load(model_path))
 
+    model = model(utility.config.device)
     result_list: List = []
     with torch.no_grad():
         model.eval()
