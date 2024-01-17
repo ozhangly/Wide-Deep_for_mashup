@@ -11,21 +11,37 @@ from utility.transcoding import encode_api_list, encode_api, \
 args = utility.config.args
 
 
-def encode_test_data(data: Dict) -> List:
-    input_data: List = []
+def encode_test_data(data: Dict) -> Dict:
     api_list = data['api_list']
+
+    batch_encoded_used_api = []
+    batch_encoded_candidate_api = []
+    batch_cross_product_used_candidate_api = []
+    batch_mashup_description_feature = []
+    batch_api_description_feature = []
+
     for i in range(utility.config.api_range):
         target_api = i + 1
         if target_api not in api_list:
             encoded_candidate_api = encode_api(target_api)
             encoded_used_api = encode_api_list(api_list)
-            input_data.append({
-                'encoded_used_api': encoded_used_api,
-                'encoded_candidate_api': encoded_candidate_api,
-                'cross_product_used_candidate_api': cross_product_transformation(encoded_used_api, encoded_candidate_api),
-                'mashup_description_feature': np.loadtxt(data['description_feature']),
-                'api_description_feature': np.loadtxt(args.api_desc_path + str(target_api) + '.txt')
-            })
+            cross_product_used_candidate_api = cross_product_transformation(encoded_used_api, encoded_candidate_api)
+            mashup_description_feature = np.loadtxt(data['description_feature'])
+            api_description_feature = np.loadtxt(args.api_desc_path + str(target_api) + '.txt')
+
+            batch_api_description_feature.append(api_description_feature)
+            batch_mashup_description_feature.append(mashup_description_feature)
+            batch_cross_product_used_candidate_api.append(cross_product_used_candidate_api)
+            batch_encoded_candidate_api.append(encoded_candidate_api)
+            batch_encoded_used_api.append(encoded_candidate_api)
+
+    input_data = {
+        'encoded_candidate_api': torch.tensor(batch_encoded_candidate_api, dtype=torch.float64),
+        'encoded_used_api': torch.tensor(batch_encoded_used_api, dtype=torch.float64),
+        'cross_product_used_candidate_api': torch.tensor(batch_cross_product_used_candidate_api, dtype=torch.float64),
+        'mashup_description_feature': torch.tensor(batch_mashup_description_feature, dtype=torch.float64),
+        'api_description_feature': torch.tensor(batch_api_description_feature, dtype=torch.float64)
+    }
 
     return input_data
 
