@@ -90,7 +90,7 @@ def train() -> None:
 
 
 if __name__ == '__main__':
-
+    # 如果继续训练就加载模型
     if args.continue_training:
         model.load_state_dict(torch.load('./' + path + '/model_' + fold + '.pth'))
         wide_optimizer.load_state_dict(torch.load('./' + path + '/wide_optimizer_' + fold + '.pth'))
