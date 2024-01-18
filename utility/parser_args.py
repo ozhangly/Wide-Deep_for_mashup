@@ -22,6 +22,8 @@ def arg_parse():
 
     args.add_argument('--recommend_res', nargs='?', default='testing_WD_0.json', type=str)
 
+    args.add_argument('--result', nargs='?', default='result.csv', type=str)
+
     args.add_argument('--model_type', nargs='?', default='Wide&Deep', type=str)
 
     # 还有一些模型和训练的参数
