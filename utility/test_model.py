@@ -1,5 +1,6 @@
 import json
 import torch
+import metrics
 import Wide_Deep
 import utility.config
 import numpy as np
@@ -55,9 +56,46 @@ def get_top_n_api(probability_list, top_n) -> List:
     return top_n_api
 
 
+def get_performance(user_pos_test, r, auc, ks) -> Dict:
+    precision, recall, ndcg, \
+    map, fone, mrr = [], [], [], [], [], []
+
+    for k in ks:
+        precision.append(metrics.precision_at_k(r, k))
+        recall.append(metrics.recall_at_k(r, k, len(user_pos_test)))
+        ndcg.append(metrics.ndcg_at_k(r, k, 1))
+        map.append(metrics.average_precision(r, k))
+        mrr.append(metrics.mrr_at_k(r, k))
+        fone.append(metrics.F1(metrics.precision_at_k(r, k), metrics.recall_at_k(r, k, len(user_pos_test))))
+
+    return {
+        'recall': np.array(recall), 'precision': np.array(precision), 'ndcg': np.array(ndcg),
+        'map': np.array(map), 'mrr': mrr, 'fone': np.array(fone)
+    }
+
+
+def test_one(pos_test, user_rating) -> Dict:
+    r = []
+    for i in user_rating:
+        if i in pos_test:
+            r.append(1)
+        else:
+            r.append(0)
+    auc = 0.
+    return get_performance(pos_test, r, auc, [5, 10])
+
+
 def test_model(model_path: str) -> None:
+
+    result = {
+        'precision': np.zeros(2), 'ndcg': np.zeros(2), 'map': np.zeros(2),
+        'recall': np.zeros(2), 'mrr': np.zeros(2), 'fone': np.zeros(2)
+    }
+
+    result_file = open(file=args.output_path + args.result, mode='a')
     write_recommend_fp = open(file=args.output_path + args.recommend_res, mode='w')
     test_fp = open(file=args.testing_data_path + args.test_dataset, mode='r')
+
     model = Wide_Deep.WideDeep(utility.config.api_range)
     model.load_state_dict(torch.load(model_path))
 
@@ -94,6 +132,14 @@ def test_model(model_path: str) -> None:
             write_content = json.dumps(write_data) + '\n'
             write_recommend_fp.write(write_content)
 
+            res = test_one(pos_test=removed_api, user_rating=top_n_api)
+            result['precision'] += res['precision']
+            result['map'] += res['map']
+            result['mrr'] += res['mrr']
+            result['fone'] += res['fone']
+            result['ndcg'] += res['ndcg']
+            result['recall'] += res['recall']
+
             set_true = set(removed_api) & set(top_n_api[:10])
             list_true = list(set_true)
 
@@ -106,6 +152,26 @@ def test_model(model_path: str) -> None:
 
     test_fp.close()
     write_recommend_fp.close()
+
+    result['precision'] /= test_num
+    result['recall'] /= test_num
+    result['ndcg'] /= test_num
+    result['map'] /= test_num
+    result['mrr'] /= test_num
+    result['fone'] /= test_num
+
+    result_content = '%s\n%s\n%s\n%s\n%s\n%s\n' % (
+        ','.join(['%.5f' % r for r in result['precision']]),
+        ','.join(['%.5f' % r for r in result['ndcg']]),
+        ','.join(['%.5f' % r for r in result['recall']]),
+        ','.join(['%.5f' % r for r in result['map']]),
+        ','.join(['%.5f' % r for r in result['mrr']]),
+        ','.join(['%.5f' % r for r in result['fone']]),
+    )
+
+    result_file.write(result_content)
+
+    result_file.close()
 
 
 if __name__ == '__main__':
