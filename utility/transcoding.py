@@ -1,20 +1,20 @@
 import numpy as np
-import load_data
+import utility.config as config
 
 from typing import Dict, Union, List
 
 
-args = load_data.args
+args = config.args
 
 
-def encode_api_list(api_list, api_range = load_data.api_range) -> np.ndarray:
+def encode_api_list(api_list, api_range=config.api_range) -> np.ndarray:
     encoded_api = np.zeros(api_range)
     for api in api_list:
         encoded_api[api - 1] = 1
     return encoded_api
 
 
-def encode_api(api, api_range: int = load_data.api_range) -> np.ndarray:
+def encode_api(api, api_range: int = config.api_range) -> np.ndarray:
     encoded_api = np.zeros(api_range)
     encoded_api[api - 1] = 1
     return encoded_api
