@@ -14,7 +14,7 @@ class APIDataSet(Dataset):
         file_path: str = args.training_data_path + args.dataset
         number: int = 0
         with open(file=file_path, mode='r') as fp:
-            for _ in tqdm(fp, desc='load dataset', leave=False):
+            for _ in tqdm(fp, desc='load dataset', leave=True):
                 number += 1
         fp = open(file=file_path, mode='r')
         lines = fp.readlines()
