@@ -8,7 +8,6 @@ import utility.config
 import torch.optim as optim
 
 from tqdm import tqdm
-from typing import Union
 from tensorboardX import SummaryWriter
 
 
