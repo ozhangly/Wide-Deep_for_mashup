@@ -1,6 +1,6 @@
 import torch
 
-from parser_args import arg_parse
+from utility.parse_args import arg_parse
 
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
