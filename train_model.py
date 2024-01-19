@@ -24,8 +24,8 @@ data_loader = utility.dataset.get_dataloader()
 criterion = torch.nn.BCELoss()
 
 # 两个部分的优化方式不同
-wide_optimizer = optim.Adagrad(Wide_Deep.Wide.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-deep_optimizer = optim.Adam(Wide_Deep.Deep.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+wide_optimizer = optim.Adagrad(model.wide.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+deep_optimizer = optim.Adam(model.deep.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
 fold: str = '4'
 path: str = 'model_wide_deep'
@@ -37,7 +37,7 @@ def ensure_dir(path: str) -> None:
 
 
 def train() -> None:
-    train_bar = tqdm(desc='train process...', leave=False, total=args.epoch)
+    train_bar = tqdm(desc='train process...', leave=True, total=args.epoch)
     # 什么时候开始训练呢?
     model.train()
     for i in range(args.epoch):
