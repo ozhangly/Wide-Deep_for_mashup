@@ -1,15 +1,18 @@
+import re
 import json
 import torch
-import metrics
 import Wide_Deep
 import utility.config
+
 import numpy as np
+import utility.metrics as metrics
 
 from typing import Dict, List
 from utility.transcoding import encode_api_list, encode_api, \
     cross_product_transformation
 
 args = utility.config.args
+fold = re.findall('[0-9]', args.dataset)[0]
 
 
 def encode_test_data(data: Dict) -> Dict:
@@ -28,7 +31,7 @@ def encode_test_data(data: Dict) -> Dict:
             encoded_used_api = encode_api_list(api_list)
             cross_product_used_candidate_api = cross_product_transformation(encoded_used_api, encoded_candidate_api)
             mashup_description_feature = np.loadtxt(data['description_feature'])
-            api_description_feature = np.loadtxt(args.test_api_desc_path + str(target_api) + '.txt')
+            api_description_feature = np.loadtxt(args.api_desc_path + str(target_api) + '.txt')
 
             batch_api_description_feature.append(api_description_feature)
             batch_mashup_description_feature.append(mashup_description_feature)
@@ -91,10 +94,13 @@ def test_model(model_path: str) -> None:
         'precision': np.zeros(4), 'ndcg': np.zeros(4), 'map': np.zeros(4),
         'recall': np.zeros(4), 'mrr': np.zeros(4), 'fone': np.zeros(4)
     }
-    # 写结果指标指针
-    result_file = open(file=args.output_path + args.result, mode='w')
+
+    result_file = args.output_path + 'result_' + fold + '.csv'
+    recommend_file = args.output_path + 'testing_WD_' + fold + '.json'
+    # 推荐结果指标指针
+    result_file_fp = open(file=result_file, mode='w')
     # 推荐结果指针
-    write_recommend_fp = open(file=args.output_path + args.recommend_res, mode='w')
+    write_recommend_fp = open(file=recommend_file, mode='w')
     # 读取测试文件指针
     test_fp = open(file=args.testing_data_path + args.test_dataset, mode='r')
 
@@ -171,12 +177,11 @@ def test_model(model_path: str) -> None:
         ','.join(['%.5f' % r for r in result['fone']])
     )
 
-    result_file.write(result_content)
+    result_file_fp.write(result_content)
 
-    result_file.close()
+    result_file_fp.close()
 
 
 if __name__ == '__main__':
-    fold: str = '4'
     path: str = 'model_wide_deep'
     test_model('./' + path + '/model_' + fold + '.pth')
