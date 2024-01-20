@@ -14,7 +14,7 @@ class APIDataSet(Dataset):
         file_path: str = args.training_data_path + args.dataset
         number: int = 0
         with open(file=file_path, mode='r') as fp:
-            for _ in tqdm(fp, desc='load dataset', leave=True):
+            for _ in tqdm(fp, desc='load dataset', leave=False):
                 number += 1
         fp = open(file=file_path, mode='r')
         lines = fp.readlines()
@@ -31,12 +31,12 @@ class APIDataSet(Dataset):
         label = data['label']
         data = utility.transcoding.encode_data(data)
 
-        return data, label                      # 返回字典和一个数值, 应该不是这里进行tensor化的。真的不用吗?
+        return data, label                      # 返回字典和一个数值
 
 
 def get_dataloader(train: bool = True) -> DataLoader:
     dataset = APIDataSet()
     batch_size = args.train_batch_size if train else args.test_batch_size
-    loader = DataLoader(dataset=dataset, shuffle=True, batch_size=batch_size, num_workers=4)
+    loader = DataLoader(dataset=dataset, shuffle=True, batch_size=batch_size, num_workers=0)
 
     return loader
