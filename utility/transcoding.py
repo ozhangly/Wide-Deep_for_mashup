@@ -1,25 +1,26 @@
 import numpy as np
 import utility.config as config
 
+from numba import jit
 from typing import Dict, Union, List
 
 
 args = config.args
 
-
+@jit
 def encode_api_list(api_list, api_range=config.api_range) -> np.ndarray:
     encoded_api = np.zeros(api_range)
     for api in api_list:
         encoded_api[api - 1] = 1
     return encoded_api
 
-
+@jit
 def encode_api(api, api_range: int = config.api_range) -> np.ndarray:
     encoded_api = np.zeros(api_range)
     encoded_api[api - 1] = 1
     return encoded_api
 
-
+@jit
 def cross_product_transformation(encoded_api_list, encoded_api) -> np.ndarray:
     cross_product_feature = np.array([x1*x2 for x1 in encoded_api_list for x2 in encoded_api])
     return cross_product_feature
