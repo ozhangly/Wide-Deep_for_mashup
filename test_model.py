@@ -28,7 +28,7 @@ def encode_test_data(data: Dict) -> Dict:
             encoded_used_api = encode_api_list(api_list)
             cross_product_used_candidate_api = cross_product_transformation(encoded_used_api, encoded_candidate_api)
             mashup_description_feature = np.loadtxt(data['description_feature'])
-            api_description_feature = np.loadtxt(args.api_desc_path + str(target_api) + '.txt')
+            api_description_feature = np.loadtxt(args.test_api_desc_path + str(target_api) + '.txt')
 
             batch_api_description_feature.append(api_description_feature)
             batch_mashup_description_feature.append(mashup_description_feature)
@@ -37,11 +37,11 @@ def encode_test_data(data: Dict) -> Dict:
             batch_encoded_used_api.append(encoded_candidate_api)
 
     input_data = {
-        'encoded_candidate_api': torch.tensor(batch_encoded_candidate_api, dtype=torch.float64),
-        'encoded_used_api': torch.tensor(batch_encoded_used_api, dtype=torch.float64),
-        'cross_product_used_candidate_api': torch.tensor(batch_cross_product_used_candidate_api, dtype=torch.float64),
-        'mashup_description_feature': torch.tensor(batch_mashup_description_feature, dtype=torch.float64),
-        'api_description_feature': torch.tensor(batch_api_description_feature, dtype=torch.float64)
+        'encoded_candidate_api': torch.tensor(batch_encoded_candidate_api, dtype=torch.float32),
+        'encoded_used_api': torch.tensor(batch_encoded_used_api, dtype=torch.float32),
+        'cross_product_used_candidate_api': torch.tensor(batch_cross_product_used_candidate_api, dtype=torch.float32),
+        'mashup_description_feature': torch.tensor(batch_mashup_description_feature, dtype=torch.float32),
+        'api_description_feature': torch.tensor(batch_api_description_feature, dtype=torch.float32)
     }
 
     return input_data
@@ -82,24 +82,26 @@ def test_one(pos_test, user_rating) -> Dict:
         else:
             r.append(0)
     auc = 0.
-    return get_performance(pos_test, r, auc, [5, 10])
+    return get_performance(pos_test, r, auc, [1, 3, 5, 10])
 
 
 def test_model(model_path: str) -> None:
 
     result = {
-        'precision': np.zeros(2), 'ndcg': np.zeros(2), 'map': np.zeros(2),
-        'recall': np.zeros(2), 'mrr': np.zeros(2), 'fone': np.zeros(2)
+        'precision': np.zeros(4), 'ndcg': np.zeros(4), 'map': np.zeros(4),
+        'recall': np.zeros(4), 'mrr': np.zeros(4), 'fone': np.zeros(4)
     }
-
-    result_file = open(file=args.output_path + args.result, mode='a')
+    # 写结果指标指针
+    result_file = open(file=args.output_path + args.result, mode='w')
+    # 推荐结果指针
     write_recommend_fp = open(file=args.output_path + args.recommend_res, mode='w')
+    # 读取测试文件指针
     test_fp = open(file=args.testing_data_path + args.test_dataset, mode='r')
 
-    model = Wide_Deep.WideDeep(utility.config.api_range)
+    model = Wide_Deep.WideAndDeep()
     model.load_state_dict(torch.load(model_path))
 
-    model = model(utility.config.device)
+    model = model.to(utility.config.device)
     result_list: List = []
 
     test_num: int = 0
@@ -166,7 +168,7 @@ def test_model(model_path: str) -> None:
         ','.join(['%.5f' % r for r in result['recall']]),
         ','.join(['%.5f' % r for r in result['map']]),
         ','.join(['%.5f' % r for r in result['mrr']]),
-        ','.join(['%.5f' % r for r in result['fone']]),
+        ','.join(['%.5f' % r for r in result['fone']])
     )
 
     result_file.write(result_content)
