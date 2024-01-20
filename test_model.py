@@ -12,7 +12,8 @@ from utility.transcoding import encode_api_list, encode_api, \
     cross_product_transformation
 
 args = utility.config.args
-fold = re.findall('[0-9]', args.dataset)[0]
+fold = re.findall('[0-9]', args.dataset)[0]     # 从训练数据集中读取折数
+ks: List = [1, 3, 5, 10]                        # 推荐指标的top_n
 
 
 def encode_test_data(data: Dict) -> Dict:
@@ -59,7 +60,7 @@ def get_top_n_api(probability_list, top_n) -> List:
     return top_n_api
 
 
-def get_performance(user_pos_test, r, auc, ks) -> Dict:
+def get_performance(user_pos_test, r, auc) -> Dict:
     precision, recall, ndcg, \
     map, fone, mrr = [], [], [], [], [], []
 
@@ -85,14 +86,14 @@ def test_one(pos_test, user_rating) -> Dict:
         else:
             r.append(0)
     auc = 0.
-    return get_performance(pos_test, r, auc, [1, 3, 5, 10])
+    return get_performance(pos_test, r, auc)
 
 
 def test_model(model_path: str) -> None:
 
     result = {
-        'precision': np.zeros(4), 'ndcg': np.zeros(4), 'map': np.zeros(4),
-        'recall': np.zeros(4), 'mrr': np.zeros(4), 'fone': np.zeros(4)
+        'precision': np.zeros(len(ks)), 'ndcg': np.zeros(len(ks)), 'map': np.zeros(len(ks)),
+        'recall': np.zeros(len(ks)), 'mrr': np.zeros(len(ks)), 'fone': np.zeros(len(ks))
     }
 
     result_file = args.output_path + 'result_' + fold + '.csv'
