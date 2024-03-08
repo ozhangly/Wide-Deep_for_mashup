@@ -1,7 +1,7 @@
 # desc: str = 'MyMemory Language Translator is an application that lets users to translate text from one language to another. This application uses the MyMemory API service.'
 # sentences = [sen.strip().lower() for sen in desc.strip().split('.') if sen != '']
 # print(sentences)
-
+import pandas
 # api_df = pd.read_csv('./cloud api dataset/apis_detail.csv', encoding='ISO-8859-1').loc[:, ['url', 'description']]
 # print(api_df.head())
 
@@ -217,7 +217,83 @@
 #     print(data)
 #     break
 ####################################################################################
-import heapq
-item_score = {1: 5, 2: 10, 3: 3, 4: 1, 5: 6}
-k_max_item_score = heapq.nlargest(5, item_score, key=item_score.get)
-print(k_max_item_score)
+# import pandas as pd
+# from typing import List
+# # 测试cloud api dataset 下的mashups_detail是不是有空的情况
+# mashup_pd = pd.read_csv('./cloud api dataset/mashups_detail.csv', encoding='ISO-8859-1')
+# desc_na_cnt: int = 0
+# cate_na_cnt: int = 0
+# category_list: List[str] = []
+# for index, row in mashup_pd.iterrows():
+#     if pd.isna(row['description']):
+#         desc_na_cnt += 1
+#     if pd.isna(row['categories']):
+#         cate_na_cnt += 1
+#         category_list += [row['title']]
+#
+# print(f'description 为空的个数{desc_na_cnt}')
+# print(f'categories 为空的个数{cate_na_cnt}')
+# print(category_list)
+####################################################################################
+# import pandas as pd
+# from typing import List, Dict, Tuple
+#
+#
+# def get_api_description_and_tag() -> Tuple[Dict[str, str], Dict[str, str]]:
+#     api_df = pd.read_csv('./cloud api dataset/apis_detail.csv', encoding='ISO-8859-1')
+#     api_desc_dict: Dict[str, str] = {}
+#     api_tag_dict: Dict[str, str] = {}
+#     for index, row in api_df.iterrows():
+#         row['url'] = row['url'].strip('\n')
+#         api_desc_dict[row['url']] = row['description']
+#         api_tag_dict[row['url']] = row['tags']
+#
+#     del api_df
+#     return api_desc_dict, api_tag_dict
+#
+#
+# # 需要重新新建一个文件
+# if __name__ == '__main__':
+#     desc_dict, tag_dict = get_api_description_and_tag()
+#     new_api_details_data: List = []
+#     api_pd = pd.read_csv('./origin dataset/cloud api detail.csv')
+#     for index, row in api_pd.iterrows():
+#         api_url = row['url']
+#         new_api_details_data.append({
+#             'id': index+1,
+#             'url': api_url,
+#             'category': tag_dict[api_url],
+#             'description': desc_dict[api_url]
+#         })
+#
+#     # 创建DataFrame
+#     new_data_frame = pd.DataFrame(new_api_details_data, columns=['id', 'url', 'category', 'description'])
+#     new_data_frame.to_csv(path_or_buf='./new_api_details.csv', index=False)
+####################################################################################
+# 测试new_api_details中category和description是否有为空
+# import pandas as pd
+# from typing import List
+#
+# # api details需要ISO-8859-1编码方式打开
+# # api details 的问题已经解决了
+# new_api_df = pd.read_csv('./new_api_details.csv', encoding='ISO-8859-1')
+# cate_na_cnt: int = 0
+# desc_na_cnt: int = 0
+# api_list: List[str] = []
+# for index, row in new_api_df.iterrows():
+#     if pd.isna(row['category']):
+#         cate_na_cnt += 1
+#         api_list += [row['id']]
+#     if pd.isna(row['description']):
+#         desc_na_cnt += 1
+# print(f'category为nan的个数: {cate_na_cnt}')
+# print(f'description为nan的个数: {desc_na_cnt}')
+# print(api_list)
+####################################################################################
+# line_cnt: int = 0
+# with open(file='./new origin dataset/mashups_details.csv', encoding='ISO-8859-1') as f:
+#     for line in f.readlines():
+#         print(line)
+#         line_cnt += 1
+#         if line_cnt == 10:
+#             break
