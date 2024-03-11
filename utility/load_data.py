@@ -59,7 +59,7 @@ def generate_train_data(ma_api_list: List, file: str) -> None:
                     'mashup_id': mashup_id,
                     'api_list': new_api_list,
                     'target_api': api_list[i],
-                    'description_feature': '../origin dataset/ma_desc_feature/' + str(mashup_id) + '.txt',
+                    'description_feature': './origin dataset/ma_desc_feature/' + str(mashup_id) + '.txt',
                     'label': 1
                 }
                 obj_s = json.dumps(temp_data) + '\n'
@@ -76,7 +76,7 @@ def generate_train_data(ma_api_list: List, file: str) -> None:
                     'mashup_id': mashup_id,
                     'api_list': new_api_list,
                     'target_api': false_api1,
-                    'description_feature': '../origin dataset/ma_desc_feature/' + str(mashup_id) + '.txt',
+                    'description_feature': './origin dataset/ma_desc_feature/' + str(mashup_id) + '.txt',
                     'label': 0
                 }
                 obj_s = json.dumps(temp_data2) + '\n'
@@ -90,7 +90,7 @@ def generate_train_data(ma_api_list: List, file: str) -> None:
                     'mashup_id': mashup_id,
                     'api_list': new_api_list,
                     'target_api': false_api1,
-                    'description_feature': '../origin dataset/ma_desc_feature/' + str(mashup_id) + '.txt',
+                    'description_feature': './origin dataset/ma_desc_feature/' + str(mashup_id) + '.txt',
                     'label': 0
                 }
                 obj_s = json.dumps(temp_data2) + '\n'
@@ -104,7 +104,7 @@ def generate_train_data(ma_api_list: List, file: str) -> None:
                     'mashup_id': mashup_id,
                     'api_list': new_api_list,
                     'target_api': false_api1,
-                    'description_feature': '../origin dataset/ma_desc_feature/' + str(mashup_id) + '.txt',
+                    'description_feature': './origin dataset/ma_desc_feature/' + str(mashup_id) + '.txt',
                     'label': 0
                 }
                 obj_s = json.dumps(temp_data2) + '\n'
@@ -140,7 +140,7 @@ def generate_test_data(ma_api_list: List, file: str, remove_num: int = 1) -> Non
                 'mashup_id': mashup_id,
                 'api_list': api_list,
                 'removed_api_list': removed_api_list,
-                'description_feature': '../origin dataset/ma_desc_feature/' + str(mashup_id) + '.txt'
+                'description_feature': './origin dataset/ma_desc_feature/' + str(mashup_id) + '.txt'
             }
             obj_s = json.dumps(obj=temp) + '\n'
             fp.write(obj_s)
