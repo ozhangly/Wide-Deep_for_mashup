@@ -1,4 +1,3 @@
-# 接下来就开始写这个了
 import os
 import re
 import torch
@@ -17,7 +16,6 @@ model = Wide_Deep.WideAndDeep()
 model = model.to(utility.config.device)
 
 
-# 定义一个损失函数
 criterion = torch.nn.BCELoss()
 
 # 两个部分的优化方式不同
@@ -45,7 +43,7 @@ loss_list = []
 
 
 def train() -> None:
-    # 什么时候开始训练呢?
+
     model.train()
     for i in range(args.epoch):
         data_loader = utility.dataset.get_dataloader()
