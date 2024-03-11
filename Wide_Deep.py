@@ -43,7 +43,7 @@ class WideAndDeep(nn.Module):
             nn.Sigmoid()
         )
 
-        self.attn = AttentionLayer()
+        self.attention_layer = AttentionLayer()
 
         self.deep = nn.Sequential(
             nn.Linear(config.args.d_v + 1024, 512),
@@ -66,7 +66,7 @@ class WideAndDeep(nn.Module):
 
         input_k, input_v, input_q = input['encoded_used_api'], input['encoded_used_api'], input['encoded_candidate_api']
 
-        api_context = self.attn(input_k, input_v, input_q)                          # context: [batch_size, d_v]
+        api_context = self.attention_layer(input_k, input_v, input_q)                  # context: [batch_size, d_v]
 
         deep_inputs = [input['mashup_description'], api_context, input['candidate_api_description']]
         deep_input = torch.cat(deep_inputs, dim=1).float()
