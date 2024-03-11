@@ -22,7 +22,7 @@ def arg_parse():
     # 测试数据集
     args.add_argument('--test_dataset', nargs='?', default='testing_0.json', type=str)
 
-    # 还有一些模型和训练的参数
+    # 模型和训练的参数
     args.add_argument('--d_k', nargs='?', default=64, type=int)
 
     args.add_argument('--d_v', nargs='?', default=64, type=int)
