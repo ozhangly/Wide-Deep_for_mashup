@@ -27,9 +27,9 @@ class AttentionLayer(nn.Module):
         self.W_Q = nn.Linear(config.api_range, config.args.d_q, bias=False)
 
     def forward(self, input_K, input_V, input_Q):                      # inputs : [batch_size, api_range]
-        Q = self.W_Q(input_Q)                                          # Q: [batch_size, d_q]
         K = self.W_K(input_K)                                          # K: [batch_size, d_k]
         V = self.W_V(input_V)                                          # V: [batch_size, d_v]
+        Q = self.W_Q(input_Q)                                          # Q: [batch_size, d_q]
         context = ScaledDotProductAttention()(Q, K, V)                 # context: [batch_size, d_v]
 
         return context
@@ -60,16 +60,18 @@ class WideAndDeep(nn.Module):
     def forward(self, input):
         wide_inputs = [input['encoded_used_api'], input['encoded_candidate_api'],
                        input['cross_product_used_candidate_api']]
-        wide_input = torch.cat(wide_inputs, dim=1).float()
+        wide_input = torch.cat(wide_inputs, dim=1).float()                             # wide_input: [batch_size, api_range^2 + 2*api_range]
         wide_input = wide_input.to(config.device)
         wide_output = self.wide(wide_input)
 
-        input_k, input_v, input_q = input['encoded_used_api'], input['encoded_used_api'], input['encoded_candidate_api']
+        input_k, input_v, input_q = input['encoded_used_api'], \
+                                    input['encoded_used_api'], \
+                                    input['encoded_candidate_api']
 
-        api_context = self.attention_layer(input_k, input_v, input_q)                  # context: [batch_size, d_v]
+        api_context = self.attention_layer(input_k, input_v, input_q)                  # api_context: [batch_size, d_v]
 
         deep_inputs = [input['mashup_description'], api_context, input['candidate_api_description']]
-        deep_input = torch.cat(deep_inputs, dim=1).float()
+        deep_input = torch.cat(deep_inputs, dim=1).float()                             # deep_input: [batch_size, dv + 1024]
         deep_input = deep_input.to(config.device)
 
         deep_output = self.deep(deep_input)
