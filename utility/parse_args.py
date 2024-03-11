@@ -23,6 +23,12 @@ def arg_parse():
     args.add_argument('--test_dataset', nargs='?', default='testing_0.json', type=str)
 
     # 还有一些模型和训练的参数
+    args.add_argument('--d_k', nargs='?', default=64, type=int)
+
+    args.add_argument('--d_v', nargs='?', default=64, type=int)
+
+    args.add_argument('--d_q', nargs='?', default=64, type=int)
+
     args.add_argument('--continue_training', nargs='?', default=0, type=int)
 
     args.add_argument('--train_batch_size', nargs='?', default=256, type=int)
