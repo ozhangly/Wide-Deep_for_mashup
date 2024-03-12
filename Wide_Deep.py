@@ -14,7 +14,7 @@ class AttentionModule(nn.Module):
         self.W_Q = nn.Linear(config.api_range, config.args.d_q)     # W_Q: [api_range, d_q]
         self.softmax = nn.Softmax(dim=1)
 
-    def forward(self, input_k, input_v, input_q):   # input_k: [batch_size, api_range]  input_q=input_k  input_v: [batch_size, d_v]
+    def forward(self, input_k, input_v, input_q):   # input_k: [batch_size, api_range]  三个维度相同
         K = self.W_K(input_k)               # K: [batch_size, d_k]
         V = self.W_V(input_v)               # V: [batch_size, d_v]
         Q = self.W_Q(input_q)               # Q: [batch_size, d_q]    d_k == d_q
