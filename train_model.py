@@ -1,7 +1,7 @@
 import os
 import re
 import torch
-import Wide_Deep
+import Wide_Deep_Plus
 import utility.dataset
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,10 +9,9 @@ import utility.config
 
 from tqdm import tqdm
 
-
 args = utility.dataset.args
 
-model = Wide_Deep.WideAndDeep()
+model = Wide_Deep_Plus.WideAndDeep()
 model = model.to(utility.config.device)
 
 
@@ -31,7 +30,7 @@ wide_optimizer = torch.optim.Adam(wide_params, lr=args.lr, weight_decay=args.wei
 deep_optimizer = torch.optim.Adagrad(deep_params, lr=args.lr, weight_decay=args.weight_decay)
 
 fold: str = re.findall('[0-9]', args.dataset)[0]
-path: str = 'model_wide_deep'
+path: str = 'model_wide_deep_plus'
 
 
 def ensure_dir(ensure_path: str) -> None:
@@ -73,6 +72,7 @@ def train() -> None:
 
             bar.set_description("epoch:{} idx:{} loss:{:.3f}".format(i, idx, np.mean(loss_list)))
             if not (idx % 100):
+                ensure_dir('./' + path)
                 torch.save(model.state_dict(), './' + path + '/model_' + fold + '.pth')
                 torch.save(wide_optimizer.state_dict(), './' + path + '/wide_optimizer_' + fold + '.pth')
                 torch.save(deep_optimizer.state_dict(), './' + path + '/deep_optimizer_' + fold + '.pth')
@@ -87,6 +87,7 @@ if __name__ == '__main__':
         model.load_state_dict(torch.load('./' + path + '/model_' + fold + '.pth'))
         wide_optimizer.load_state_dict(torch.load('./' + path + '/wide_optimizer_' + fold + '.pth'))
         deep_optimizer.load_state_dict(torch.load('./' + path + '/deep_optimizer_' + fold + '.pth'))
+        print('load model')
 
     train()
     plt.figure(figsize=(50, 8))
