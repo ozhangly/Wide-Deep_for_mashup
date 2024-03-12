@@ -31,7 +31,7 @@ def arg_parse():
 
     args.add_argument('--continue_training', nargs='?', default=0, type=int)
 
-    args.add_argument('--train_batch_size', nargs='?', default=256, type=int)
+    args.add_argument('--train_batch_size', nargs='?', default=32, type=int)
 
     args.add_argument('--test_batch_size', nargs='?', default=64, type=int)
 
