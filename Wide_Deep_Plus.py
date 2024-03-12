@@ -20,12 +20,12 @@ class AttentionModule(nn.Module):
         V = self.W_V(input_v).reshape(batch_size, -1, config.args.d_v).transpose(0, 1)  # V: [head, batch_size, d_v]
         Q = self.W_Q(input_q).reshape(batch_size, -1, config.args.d_q).transpose(0, 1)  # Q: [head, batch_size, d_q]    d_k == d_q
 
-        attn_mat = torch.matmul(Q, K.transpose(-1, -2))             # attn_mat: [head, batch_size, batch_size]
-        attn_score = self.softmax(attn_mat/np.sqrt(K.shape[-1]))    # attn_score=attn_mat
-        context = torch.matmul(attn_score, V)                       # context: [head, batch_size, d_v]
+        attn_mat = torch.matmul(Q, K.transpose(-1, -2))                                 # attn_mat: [head, batch_size, batch_size]
+        attn_score = self.softmax(attn_mat/np.sqrt(K.shape[-1]))                        # attn_score=attn_mat
+        context = torch.matmul(attn_score, V)                                           # context: [head, batch_size, d_v]
         # 要不要再接一个线性层呢?
         # 2024/3/12 下午17:11, 先不接了，等明天汇报在决定
-        context = context.transpose(0, 1).reshape(batch_size, -1)   # context: [batch_size, head * d_v]
+        context = context.transpose(0, 1).reshape(batch_size, -1)                       # context: [batch_size, head * d_v]
 
         return context
 
@@ -54,6 +54,7 @@ class WideAndDeep(nn.Module):
         self.wide_deep = nn.Sigmoid()
 
     def forward(self, input):
+        # wide 部分
         wide_inputs = [input['encoded_used_api'], input['encoded_candidate_api'],
                        input['cross_product_used_candidate_api']]
         wide_input = torch.cat(wide_inputs, dim=1).float()                        # wide_input: [batch_size, api_range^2 + 2*api_range]
@@ -65,9 +66,11 @@ class WideAndDeep(nn.Module):
         input_v = input_v.to(config.device).float()
         input_q = input_q.to(config.device).float()
 
+        # 注意力部分
         api_context = self.attn_layer(input_k, input_v, input_q)            # input_k=input_q: [batch_size, d_q], input_v: [batch_size, d_q]
                                                                             # api_context: [batch_size, head * d_v]
 
+        #deep 部分
         mashup_description_feature = input['mashup_description_feature']
         candidate_api_description_feature = input['candidate_api_description_feature']
         mashup_description_feature = mashup_description_feature.to(config.device).float()
