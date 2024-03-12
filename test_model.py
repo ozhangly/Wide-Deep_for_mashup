@@ -1,3 +1,4 @@
+import os
 import re
 import json
 import torch
@@ -98,6 +99,9 @@ def test_model(model_path: str) -> None:
 
     result_file = args.output_path + 'result_' + fold + '.csv'
     recommend_file = args.output_path + 'testing_WD_' + fold + '.json'
+
+    if not os.path.exists(args.output_path):
+        os.mkdir(args.output_path)
     # 推荐结果指标指针
     result_file_fp = open(file=result_file, mode='w')
     # 推荐结果指针
