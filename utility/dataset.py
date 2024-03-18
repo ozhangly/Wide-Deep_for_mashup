@@ -1,4 +1,7 @@
 import json
+
+import torch
+
 import utility.transcoding
 
 from tqdm import tqdm
@@ -31,7 +34,7 @@ class APIDataSet(Dataset):
         label = data['label']
         data = utility.transcoding.encode_data(data)
 
-        return data, label                      # 返回字典和一个数值
+        return data, label
 
 
 def get_dataloader(train: bool = True) -> DataLoader:
