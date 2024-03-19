@@ -2,6 +2,7 @@
 # sentences = [sen.strip().lower() for sen in desc.strip().split('.') if sen != '']
 # print(sentences)
 import pandas
+import torch
 # api_df = pd.read_csv('./cloud api dataset/apis_detail.csv', encoding='ISO-8859-1').loc[:, ['url', 'description']]
 # print(api_df.head())
 
@@ -276,12 +277,12 @@ import pandas
 #
 # # api details需要ISO-8859-1编码方式打开
 # # api details 的问题已经解决了
-# new_api_df = pd.read_csv('./new_api_details.csv', encoding='ISO-8859-1')
+# new_api_df = pd.read_csv('./new origin dataset/mashups_details.csv', encoding='ISO-8859-1')
 # cate_na_cnt: int = 0
 # desc_na_cnt: int = 0
 # api_list: List[str] = []
 # for index, row in new_api_df.iterrows():
-#     if pd.isna(row['category']):
+#     if pd.isna(row['categories']):
 #         cate_na_cnt += 1
 #         api_list += [row['id']]
 #     if pd.isna(row['description']):
@@ -297,3 +298,87 @@ import pandas
 #         line_cnt += 1
 #         if line_cnt == 10:
 #             break
+####################################################################################
+# import torch
+#
+# a = torch.rand(size=(3, 2, 6)).cuda()
+# b = torch.rand(size=(3, 2, 6)).cuda()
+# # 预期形状: 3, 2, 2
+# c = torch.matmul(a, b.transpose(-1, -2))
+# d = c.reshape(3, -1)
+# print(d.shape)
+
+####################################################################################
+# 测试一下dataset会自动转成tensor吗
+# from torch.utils.data import DataLoader
+# from utility.dataset import APIDataSet
+#
+# import utility.dataset
+#
+# api_dataset = utility.dataset.APIDataSet()
+# dataloader = DataLoader(dataset=api_dataset, shuffle=True, batch_size=4, num_workers=0)
+#
+# for idx, input_data in enumerate(dataloader):
+#     # do_something
+#     # emmmm....
+#     print('hello world', end=' ')
+
+####################################################################################
+# 测试函数多返回值的数据类型
+
+
+# def function():
+#     return 1, 2
+#
+#
+# a = function()
+# print(type(a))          # 返回类型为元组
+# print(a[0] + a[1])
+####################################################################################
+# 测试二维列表的len()为多少
+import sys
+#
+# a = [[[1, 2, 3, 4], [3, 4, 5, 6, 6, 7]],
+#      [[]]]
+# max_len = len(max(a, key=lambda x: len(x)))
+#
+# print(max_len)
+####################################################################################
+# import torch
+# import numpy as np
+#
+#
+# def encode_api(api, api_range=10) -> np.ndarray:
+#     encoded_api = np.zeros(api_range)
+#     encoded_api[api - 1] = 1
+#     return encoded_api
+#
+#
+# def encode_api_context(api_list, api_range = 10) -> np.ndarray:
+#     if len(api_list) == 0:
+#         return np.zeros(shape=(1, api_range))
+#     return np.array([encode_api(api) for api in api_list])
+#
+#
+# api_lists = [[2, 3, 5],
+#              [],
+#              [4, 2, 1, 6, 9, 4],
+#              [4],
+#              [5, 3]]
+#
+# a = []
+# for api_list in api_lists:
+#     a += [encode_api_context(api_list)]
+#
+# # 求一下max_len
+# max_len = len(max(a, key=lambda x: len(x)))
+# print(max_len)
+#
+# b = map(lambda x: np.concatenate((x, np.zeros(shape=(max_len-x.shape[0], 10))), axis=0) if x.shape[0] < max_len else x, a)
+# c = list(b)
+# print(c)
+####################################################################################
+#
+
+
+
