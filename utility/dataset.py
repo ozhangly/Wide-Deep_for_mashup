@@ -7,8 +7,29 @@ import utility.transcoding
 from tqdm import tqdm
 from torch.utils.data import Dataset, DataLoader
 
-
+config = utility.transcoding.config
 args = utility.transcoding.args
+
+
+def collate_fn(batch_data_list):        # batch_data_list: [batch_size, tuple(data(dict(str, np.ndarray)), label)
+    encoded_api_context_inputs = [torch.from_numpy(batch_data[0]['encoded_api_context']) for batch_data in batch_data_list]   # encoded_api_context: [num_used_api, api_range]    num_used_api 为本batch中api_list的最多的个数
+                                                                                                            # encoded_api_context_inputs: [batch_size, num_used_api, api_range]
+    # 在这里要处理这个encoded_api_context_inputs, 要将没有used_api的填充tensor 0, 填充长度为api_range
+    max_len = len(max(encoded_api_context_inputs, key=lambda x: len(x)))
+    encoded_api_context_inputs = list(map(lambda x: torch.cat((x, torch.zeros(size=(max_len-len(x), config.api_range)).double()), dim=0) if len(x) < max_len else x,
+                                     encoded_api_context_inputs))                # encoded_api_context_inputs: [batch_size, num_used_api, api_range]，但是是列表，需要转成tensor
+
+    encoded_api_context = torch.stack([api_context for api_context in encoded_api_context_inputs], dim=0).double()   # encoded_api_context: [batch_size, num_used_api, api_range] 维度不变，是tensor
+    mashup_description_feature = torch.stack([torch.from_numpy(batch_data[0]['mashup_description_feature']) for batch_data in batch_data_list], dim=0).double()
+    candidate_api_description_feature = torch.stack([torch.from_numpy(batch_data[0]['candidate_api_description_feature']) for batch_data in batch_data_list], dim=0).double()       # batch_size: [
+
+    labels = torch.stack([torch.tensor(batch_data[1]) for batch_data in batch_data_list], dim=0).double()     # labels: [batch_size]                                                  # labels: [batch_size, 1]
+    inputs = {
+        'encoded_api_context': encoded_api_context,
+        'mashup_description_feature': mashup_description_feature,
+        'candidate_api_description_feature': candidate_api_description_feature
+    }
+    return inputs, labels
 
 
 class APIDataSet(Dataset):
@@ -40,6 +61,6 @@ class APIDataSet(Dataset):
 def get_dataloader(train: bool = True) -> DataLoader:
     dataset = APIDataSet()
     batch_size = args.train_batch_size if train else args.test_batch_size
-    loader = DataLoader(dataset=dataset, shuffle=True, batch_size=batch_size, num_workers=0)
+    loader = DataLoader(dataset=dataset, shuffle=True, batch_size=batch_size, num_workers=0, collate_fn=collate_fn)
 
     return loader
