@@ -2,51 +2,41 @@ import os
 import re
 import json
 import torch
-import Wide_Deep
+import Wide_Deep_Plus
 import utility.config
 
 import numpy as np
 import utility.metrics as metrics
 
 from typing import Dict, List
-from utility.transcoding import encode_api_list, encode_api, \
-    cross_product_transformation
+from utility.transcoding import encode_api_context
 
 args = utility.config.args
-fold = re.findall('[0-9]', args.dataset)[0]     # 从训练数据集中读取折数
-ks: List = [1, 3, 5, 10]                        # 推荐指标的top_n
+fold = re.findall('[0-9]', args.dataset)[0]       # 从训练数据集中读取折数
+ks: List = [1, 3, 5, 10]                          # 推荐指标的top_n
 
 
 def encode_test_data(data: Dict) -> Dict:
     api_list = data['api_list']
 
-    batch_encoded_used_api = []
-    batch_encoded_candidate_api = []
-    batch_cross_product_used_candidate_api = []
     batch_mashup_description_feature = []
     batch_api_description_feature = []
+
+    encoded_api_context = encode_api_context(api_list=api_list)     # encoded_api_context: [used_api_num, api_range]
 
     for i in range(utility.config.api_range):
         target_api = i + 1
         if target_api not in api_list:
-            encoded_candidate_api = encode_api(target_api)
-            encoded_used_api = encode_api_list(api_list)
-            cross_product_used_candidate_api = cross_product_transformation(encoded_used_api, encoded_candidate_api)
             mashup_description_feature = np.loadtxt(data['description_feature'])
             api_description_feature = np.loadtxt(args.api_desc_path + str(target_api) + '.txt')
 
             batch_api_description_feature.append(api_description_feature)
             batch_mashup_description_feature.append(mashup_description_feature)
-            batch_cross_product_used_candidate_api.append(cross_product_used_candidate_api)
-            batch_encoded_candidate_api.append(encoded_candidate_api)
-            batch_encoded_used_api.append(encoded_candidate_api)
 
     input_data = {
-        'encoded_candidate_api': torch.tensor(batch_encoded_candidate_api, dtype=torch.float32),
-        'encoded_used_api': torch.tensor(batch_encoded_used_api, dtype=torch.float32),
-        'cross_product_used_candidate_api': torch.tensor(batch_cross_product_used_candidate_api, dtype=torch.float32),
-        'mashup_description_feature': torch.tensor(batch_mashup_description_feature, dtype=torch.float32),
-        'api_description_feature': torch.tensor(batch_api_description_feature, dtype=torch.float32)
+        'encoded_api_context': torch.tensor(encoded_api_context, dtype=torch.float32).repeat(len(batch_mashup_description_feature), 1, 1).cpu(),  # encoded_api_context: [batch_size, used_api_num, api_range]
+        'mashup_description_feature': torch.tensor(batch_mashup_description_feature, dtype=torch.float32).cpu(),      # mashup_description_feature: [batch_size, 512]
+        'candidate_api_description_feature': torch.tensor(batch_api_description_feature, dtype=torch.float32).cpu()             # api_description_feature: [batch_size, 512]
     }
 
     return input_data
@@ -109,10 +99,11 @@ def test_model(model_path: str) -> None:
     # 读取测试文件指针
     test_fp = open(file=args.testing_data_path + args.test_dataset, mode='r')
 
-    model = Wide_Deep.WideAndDeep()
+    model = Wide_Deep_Plus.WideAndDeep()
     model.load_state_dict(torch.load(model_path))
 
-    model = model.to(utility.config.device)
+    # model = model.to(utility.config.device)
+    model = model.cpu()
     result_list: List = []
 
     test_num: int = 0
@@ -127,12 +118,14 @@ def test_model(model_path: str) -> None:
             outputs = outputs.view(-1).tolist()
             probability_list = []
 
-            removed_api = test_obj['removed_api']
+            removed_api = test_obj['removed_api_list']
+
+            api_list = test_obj['api_list']
 
             num = 0
             for i in range(utility.config.api_range):
                 target_api = i + 1
-                if target_api not in test_obj['api_list']:
+                if target_api not in api_list:
                     probability_list.append((outputs[num], target_api))
                     num += 1
 
@@ -188,5 +181,5 @@ def test_model(model_path: str) -> None:
 
 
 if __name__ == '__main__':
-    path: str = 'model_wide_deep'
+    path: str = 'model_wide_deep_plus'
     test_model('./' + path + '/model_' + fold + '.pth')

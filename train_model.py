@@ -22,11 +22,11 @@ params = model.named_parameters()
 deep_params = []
 wide_params = []
 for name, param in params:
-    if 'wide' in name:
-        wide_params.append(param)
-    else:
+    if 'deep' in name or 'attn' in name:
         deep_params.append(param)
-wide_optimizer = torch.optim.Adam(wide_params, lr=args.lr, weight_decay=args.weight_decay)
+    else:
+        wide_params.append(param)
+# wide_optimizer = torch.optim.Adam(wide_params, lr=args.lr, weight_decay=args.weight_decay)
 deep_optimizer = torch.optim.Adagrad(deep_params, lr=args.lr, weight_decay=args.weight_decay)
 
 fold: str = re.findall('[0-9]', args.dataset)[0]
@@ -53,15 +53,15 @@ def train() -> None:
             outputs = model(datas)
             labels = labels.to(utility.config.device).float()
             outputs = outputs.view(-1).float()
-            loss_wide = criterion(outputs, labels)
+            # loss_wide = criterion(outputs, labels)
 
-            wide_optimizer.zero_grad()
-            loss_wide.backward(retain_graph=True)
-            wide_optimizer.step()
+            # wide_optimizer.zero_grad()
+            # loss_wide.backward(retain_graph=True)
+            # wide_optimizer.step()
 
-            outputs = model(datas)
-            labels = labels.to(utility.config.device).float()
-            outputs = outputs.view(-1).float()
+            # outputs = model(datas)
+            # labels = labels.to(utility.config.device).float()
+            # outputs = outputs.view(-1).float()
             loss_deep = criterion(outputs, labels)
 
             deep_optimizer.zero_grad()
@@ -74,9 +74,9 @@ def train() -> None:
             if not (idx % 100):
                 ensure_dir('./' + path)
                 torch.save(model.state_dict(), './' + path + '/model_' + fold + '.pth')
-                torch.save(wide_optimizer.state_dict(), './' + path + '/wide_optimizer_' + fold + '.pth')
+                # torch.save(wide_optimizer.state_dict(), './' + path + '/wide_optimizer_' + fold + '.pth')
                 torch.save(deep_optimizer.state_dict(), './' + path + '/deep_optimizer_' + fold + '.pth')
-        torch.save(wide_optimizer.state_dict(), './' + path + '/wide_optimizer_' + fold + '.pth')
+        # torch.save(wide_optimizer.state_dict(), './' + path + '/wide_optimizer_' + fold + '.pth')
         torch.save(deep_optimizer.state_dict(), './' + path + '/deep_optimizer_' + fold + '.pth')
         torch.save(model.state_dict(), './' + path + '/model_' + fold + '.pth')
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     # 如果继续训练就加载模型
     if args.continue_training:
         model.load_state_dict(torch.load('./' + path + '/model_' + fold + '.pth'))
-        wide_optimizer.load_state_dict(torch.load('./' + path + '/wide_optimizer_' + fold + '.pth'))
+        # wide_optimizer.load_state_dict(torch.load('./' + path + '/wide_optimizer_' + fold + '.pth'))
         deep_optimizer.load_state_dict(torch.load('./' + path + '/deep_optimizer_' + fold + '.pth'))
         print('load model')
 
