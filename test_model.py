@@ -22,7 +22,7 @@ def encode_test_data(data: Dict) -> Dict:
     batch_mashup_description_feature = []
     batch_api_description_feature = []
 
-    encoded_api_context = encode_api_context(api_list=api_list)     # encoded_api_context: [used_api_num, api_range]
+    encoded_api_context = encode_api_context(api_list=api_list)     # encoded_api_context: [used_api_num, 512]
 
     for i in range(utility.config.api_range):
         target_api = i + 1
@@ -34,9 +34,9 @@ def encode_test_data(data: Dict) -> Dict:
             batch_mashup_description_feature.append(mashup_description_feature)
 
     input_data = {
-        'encoded_api_context': torch.tensor(encoded_api_context, dtype=torch.float32).repeat(len(batch_mashup_description_feature), 1, 1).cpu(),  # encoded_api_context: [batch_size, used_api_num, api_range]
-        'mashup_description_feature': torch.tensor(batch_mashup_description_feature, dtype=torch.float32).cpu(),      # mashup_description_feature: [batch_size, 512]
-        'candidate_api_description_feature': torch.tensor(batch_api_description_feature, dtype=torch.float32).cpu()             # api_description_feature: [batch_size, 512]
+        'encoded_api_context': torch.tensor(encoded_api_context, dtype=torch.float32).repeat(len(batch_mashup_description_feature), 1, 1),  # encoded_api_context: [batch_size, used_api_num,512]
+        'mashup_description_feature': torch.tensor(batch_mashup_description_feature, dtype=torch.float32),      # mashup_description_feature: [batch_size, 512]
+        'candidate_api_description_feature': torch.tensor(batch_api_description_feature, dtype=torch.float32)   # api_description_feature: [batch_size, 512]
     }
 
     return input_data
@@ -65,7 +65,7 @@ def get_performance(user_pos_test, r, auc) -> Dict:
 
     return {
         'recall': np.array(recall), 'precision': np.array(precision), 'ndcg': np.array(ndcg),
-        'map': np.array(map), 'mrr': mrr, 'fone': np.array(fone)
+        'map': np.array(map), 'mrr': np.array(mrr), 'fone': np.array(fone)
     }
 
 
@@ -82,7 +82,7 @@ def test_one(pos_test, user_rating) -> Dict:
 
 def test_model(model_path: str) -> None:
 
-    result = {
+    results = {
         'precision': np.zeros(len(ks)), 'ndcg': np.zeros(len(ks)), 'map': np.zeros(len(ks)),
         'recall': np.zeros(len(ks)), 'mrr': np.zeros(len(ks)), 'fone': np.zeros(len(ks))
     }
@@ -102,8 +102,7 @@ def test_model(model_path: str) -> None:
     model = Wide_Deep_Plus.WideAndDeep()
     model.load_state_dict(torch.load(model_path))
 
-    # model = model.to(utility.config.device)
-    model = model.cpu()
+    model = model.to(utility.config.device)
     result_list: List = []
 
     test_num: int = 0
@@ -139,12 +138,12 @@ def test_model(model_path: str) -> None:
             write_recommend_fp.write(write_content)
 
             res = test_one(pos_test=removed_api, user_rating=top_n_api)
-            result['precision'] += res['precision']
-            result['map'] += res['map']
-            result['mrr'] += res['mrr']
-            result['fone'] += res['fone']
-            result['ndcg'] += res['ndcg']
-            result['recall'] += res['recall']
+            results['precision'] += res['precision']
+            results['map'] += res['map']
+            results['mrr'] += res['mrr']
+            results['fone'] += res['fone']
+            results['ndcg'] += res['ndcg']
+            results['recall'] += res['recall']
 
             set_true = set(removed_api) & set(top_n_api[:10])
             list_true = list(set_true)
