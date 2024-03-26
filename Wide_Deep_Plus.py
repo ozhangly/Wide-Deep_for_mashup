@@ -7,12 +7,12 @@ import utility.config as config
 class AttentionModule(nn.Module):
     def __init__(self):
         super(AttentionModule, self).__init__()
-        self.W_K = nn.Linear(config.api_range, config.args.n_heads * config.args.d_k)     # W_K: [api_range, head * d_k]
-        self.W_V = nn.Linear(config.api_range, config.args.n_heads * config.args.d_v)     # W_V: [api_range, head * d_v]
-        self.W_Q = nn.Linear(512, config.args.n_heads * config.args.d_q)                  # W_Q: [512, head * d_q]
+        self.W_K = nn.Linear(config.desc_feature_dim, config.args.n_heads * config.args.d_k)     # W_K: [512, head * d_k]
+        self.W_V = nn.Linear(config.desc_feature_dim, config.args.n_heads * config.args.d_v)     # W_V: [512, head * d_v]
+        self.W_Q = nn.Linear(config.desc_feature_dim, config.args.n_heads * config.args.d_q)     # W_Q: [512, head * d_q]
         self.softmax = nn.Softmax(dim=-1)
 
-    def forward(self, input_k, input_v, input_q):     # input_k.shape == input_v.shape: [batch_size, max_used_api_num, api_range]   input_q: [batch_size, 512]
+    def forward(self, input_k, input_v, input_q):     # input_k.shape == input_v.shape: [batch_size, max_used_api_num, 512]   input_q: [batch_size, 512]
         batch_size = input_k.shape[0]
         K = self.W_K(input_k).reshape(batch_size, -1, config.args.n_heads, config.args.d_k).transpose(1, 2)    # K: [batch_size, head, max_used_api_num, d_k]
         V = self.W_V(input_v).reshape(batch_size, -1, config.args.n_heads, config.args.d_v).transpose(1, 2)    # V: [batch_size, head, max_used_api_num, d_v]
@@ -51,16 +51,16 @@ class WideAndDeep(nn.Module):
     def forward(self, input):
 
         input_k, input_v, input_q = input['encoded_api_context'], input['encoded_api_context'], input['candidate_api_description_feature']
-        input_k = input_k.cpu().float()                     # input_k: [batch_size, max_used_api_num, api_range]
-        input_v = input_v.cpu().float()                     # input_v: [batch_size, max_used_api_num, api_range]
-        input_q = input_q.cpu().float()                     # input_q: [batch_size, 512]
+        input_k = input_k.to(config.device).float()                     # input_k: [batch_size, max_used_api_num, 512]
+        input_v = input_v.to(config.device).float()                     # input_v: [batch_size, max_used_api_num, 512]
+        input_q = input_q.to(config.device).float()                     # input_q: [batch_size, 512]
 
         # 注意力部分
         api_context = self.attn_layer(input_k, input_v, input_q)        # api_context: [batch_size, head * d_v]
 
         # deep 部分
         mashup_description_feature = input['mashup_description_feature']
-        mashup_description_feature = mashup_description_feature.cpu().float()
+        mashup_description_feature = mashup_description_feature.to(config.device).float()
 
         deep_inputs = [mashup_description_feature, api_context]
         deep_input = torch.cat(deep_inputs, dim=1)                      # deep_input: [batch_size, head*dv + 512]
